@@ -1,8 +1,8 @@
-name: Deploy frontend to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -10,61 +10,16 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: github-pages
-  cancel-in-progress: true
-
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out source
-        uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-      - name: Set deployment settings
-        env:
-          REPOSITORY: ${{ github.repository }}
-          API_URL: ${{ vars.VITE_API_URL }}
-        run: |
-          if [[ -z "$API_URL" ]]; then
-            echo "Set the VITE_API_URL repository variable to the public HTTPS URL of your deployed Express API." >&2
-            exit 1
-          fi
-          if [[ "$API_URL" != https://* ]]; then
-            echo "VITE_API_URL must use HTTPS." >&2
-            exit 1
-          fi
-          REPO_NAME="${REPOSITORY#*/}"
-          if [[ "$REPO_NAME" == *.github.io ]]; then
-            echo "VITE_BASE_PATH=/" >> "$GITHUB_ENV"
-          else
-            echo "VITE_BASE_PATH=/$REPO_NAME/" >> "$GITHUB_ENV"
-          fi
-          echo "VITE_API_URL=$API_URL" >> "$GITHUB_ENV"
-      - name: Install dependencies
-        run: npm ci
-      - name: Build frontend
-        run: npm run build
-      - name: Configure single page routes
-        run: cp dist/index.html dist/404.html
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: build
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      # Keep your existing build and deployment steps below
