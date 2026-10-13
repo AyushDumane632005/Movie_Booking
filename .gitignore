@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+.vite/
+.env
+.env.*
+!.env.example
+/database.url
+npm-debug.log*
+debug.log*
+*.log
+.DS_Store
+Thumbs.db
+Desktop.ini
